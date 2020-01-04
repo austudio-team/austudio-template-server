@@ -1,3 +1,7 @@
+use std::fs;
+mod dao;
+use dao::Dao;
+
 fn main() {
-    println!("Hello, world!");
+  let db = Dao::init().unwrap();
 }
