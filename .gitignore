@@ -1,3 +1,5 @@
 /target
 **/*.rs.bk
 template.db
+frontend/node_modules
+frontend/yarn-error.log

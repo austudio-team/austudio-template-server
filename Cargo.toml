@@ -8,6 +8,8 @@ edition = "2018"
 
 [dependencies]
 toml = "0.5"
+actix-web = "2.0"
+actix-rt = "1.0"
 
 [dependencies.rusqlite]
 version = "0.21.0"
