@@ -1,18 +1,13 @@
-use rusqlite::{params, Connection, Result, NO_PARAMS};
+use rusqlite::{Connection, Result, NO_PARAMS};
+use actix::{Actor, prelude::*};
 
-#[derive(Debug)]
-pub struct VersionRecord {
-  id: i64,
-  marjio_version: i64,
-  minor_version: i64,
-  build_number: i64,
-  description: String,
-  branch_name: String,
-  created_time: String,
-}
+pub mod structs;
+use structs::*;
 
-pub struct Dao {
-  conn: Connection,
+pub struct Dao(Connection);
+
+impl Actor for Dao {
+  type Context = SyncContext<Self>;
 }
 
 impl Dao {
@@ -30,26 +25,11 @@ impl Dao {
       )",
       NO_PARAMS,
     )?;
-    Ok(Dao {
-      conn
-    })
-  }
-
-  pub fn insert_new_version(&self, marjio_version: i64, minor_version: i64, build_number: i64, description: String, branch_name: String) -> Result<i64> {
-    let mut stmt = self.conn.prepare(
-      "INSERT INTO versions (
-        marjio_version,
-        minor_version,
-        build_number,
-        description,
-        branch_name
-      ) VALUES (?1, ?2, ?3, ?4, ?5)"
-    ).expect("Prepare Error");
-    stmt.insert(&[&marjio_version.to_string(), &minor_version.to_string(), &build_number.to_string(), &description.to_string(), &branch_name.to_string()])
+    Ok(Dao(conn))
   }
 
   pub fn get_last_version(&self) -> Result<VersionRecord> {
-    self.conn.query_row(
+    self.0.query_row(
       "select * from versions order by id DESC limit 1",
       NO_PARAMS,
       |row| Ok(
