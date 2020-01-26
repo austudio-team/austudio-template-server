@@ -1,28 +1,25 @@
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
-use actix::{Addr, System, SyncArbiter};
-mod dao;
-use dao::Dao;
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate failure;
+#[macro_use]
+extern crate serde_derive;
+#[macro_use]
+extern crate serde_json;
+#[macro_use]
+extern crate validator_derive;
+extern crate chrono;
 
-struct AppState {
-  db: Addr<Dao>,
-}
+use dotenv;
+mod db;
+mod schema;
+mod prelude;
+mod error;
+mod models;
+mod app;
+mod utils;
 
-async fn index() -> impl Responder {
-  HttpResponse::Ok().body("Hello, World")
-}
-
-#[actix_rt::main]
-async fn main() -> std::io::Result<()> {
-  let sys = System::new("austido-template-server");
-
-  let addr = SyncArbiter::start(3, || Dao::init().unwrap());
-
-  HttpServer::new(move || {
-    App::new()
-      .app_data(AppState { db: addr.clone() })
-      .route("/", web::get().to(index))
-  })
-  .bind("0.0.0.0:6060")?
-  .run()
-  .await
+fn main() {
+  dotenv::dotenv().ok();
+  app::start();
 }

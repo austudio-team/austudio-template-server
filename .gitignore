@@ -4,3 +4,4 @@ template.db
 frontend/node_modules
 frontend/yarn-error.log
 frontend/dist
+.idea
