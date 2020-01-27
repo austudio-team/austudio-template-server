@@ -72,6 +72,12 @@ impl From<DieselError> for Error {
   }
 }
 
+impl From<std::io::Error> for Error {
+  fn from(error: std::io::Error) -> Self {
+    Error::NotFound(json!({ "error": "file not exist" }))
+  }
+}
+
 impl From<ValidationErrors> for Error {
   fn from(errors: ValidationErrors) -> Self {
     let mut err_map = JsonMap::new();

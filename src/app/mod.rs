@@ -32,5 +32,5 @@ fn routes(app: &mut web::ServiceConfig) {
         .service(web::resource("versions")
           .route(web::get().to(version::list)))
       )
-      .service(web::resource("/{filename:.*}").route(web::get().to(static_files)))
+      .service(web::resource("/{filename:.*}").route(web::get().to(static_files)));
 }
