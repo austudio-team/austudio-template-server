@@ -1,12 +1,17 @@
 pub mod version;
 pub mod static_files;
+pub mod index;
+mod not_found;
+use not_found::not_found;
 pub use static_files::{*};
 pub use version::{*};
-use actix_web::{web, App, HttpServer};
+pub use index::{*};
+use actix_web::{web, App, HttpServer, HttpResponse, guard, HttpRequest};
 use actix::{Addr, SyncArbiter};
 use crate::db::{DbExecutor, new_connection};
 use std::env;
 use std::sync::Mutex;
+use crate::error::Error;
 
 pub struct AppState {
   pub db: Addr<DbExecutor>,
@@ -28,7 +33,19 @@ pub async fn start() -> std::io::Result<()> {
         token: token.clone(),
       })
       .configure(routes)
-  })
+      // default
+      .default_service(
+        // 404 for GET request
+      web::resource("")
+        .route(web::get().to(not_found))
+        // all requests that are not `GET`
+        .route(
+          web::route()
+            .guard(guard::Not(guard::Get()))
+            .to(HttpResponse::MethodNotAllowed),
+        ),
+      )
+    })
     .bind("0.0.0.0:6060")?
     .run()
     .await
@@ -42,5 +59,6 @@ fn routes(app: &mut web::ServiceConfig) {
           .route(web::post().to(version::create))
         )
       )
+      .service(web::resource("/").route(web::get().to(index)))
       .service(web::resource("/{filename:.*}").route(web::get().to(static_files)));
 }

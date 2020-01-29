@@ -7,6 +7,23 @@ use serde_json::{Map as JsonMap, Value as JsonValue};
 use std::convert::From;
 use validator::ValidationErrors;
 
+const empty_template: &'static str = r#"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>austudio-template-server</title>
+</head>
+<body>
+  <h1>404 Not Found</h1>
+  <p>Sorry, no template file was found, please create a version or choose a correct version.</p>
+  <script src="/template/bundle.js" defer></script>
+</body>
+</html>
+"#;
+
 #[derive(Fail, Debug)]
 pub enum Error {
   // 401
@@ -28,6 +45,9 @@ pub enum Error {
   // 500
   #[fail(display = "Internal Server Error")]
   InternalServerError,
+
+  #[fail(display = "Template Not Found")]
+  TemplateNotFound,
 }
 
 // the ResponseError trait lets us convert errors to http responses with appropriate data
@@ -43,6 +63,9 @@ impl ResponseError for Error {
       }
       Error::InternalServerError => {
         HttpResponse::InternalServerError().json("Internal Server Error")
+      }
+      Error::TemplateNotFound => {
+        HttpResponse::NotFound().body(empty_template)
       }
     }
   }
