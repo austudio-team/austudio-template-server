@@ -80,6 +80,8 @@ pub async fn create(state: web::Data<AppState>, mut payload: Multipart) -> impl 
       "info" => {
         let data = chunk.unwrap().to_vec();
         let str = String::from_utf8(data).unwrap();
+        let str = str.replace("\n", "\\n");
+        let str = str.replace("\r", "\\r");
         let res = serde_json::from_str::<CreateVersionParams>(&str.as_str()).unwrap();
         create_info = Some(res);
       },
