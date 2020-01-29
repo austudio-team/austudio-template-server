@@ -1,10 +1,8 @@
-use super::AppState;
-use actix_web::{Responder, web, HttpResponse, HttpRequest, ResponseError};
+use actix_web::{HttpRequest};
 use actix_files::NamedFile;
-use crate::error::{Error};
 use crate::prelude::Result;
 
-pub async fn static_files(state: web::Data<AppState>, req: HttpRequest) -> Result<NamedFile> {
+pub async fn static_files(req: HttpRequest) -> Result<NamedFile> {
   let path = req.match_info().query("filename");
   match path {
     "template/bundle.js" => {

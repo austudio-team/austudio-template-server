@@ -14,7 +14,7 @@ pub struct Version {
 
 #[derive(Debug, Insertable)]
 #[table_name = "versions"]
-pub struct NewVersion {
+pub struct CreateVersion {
   pub major_version: i32,
   pub minor_version: i32,
   pub build_number: i32,
