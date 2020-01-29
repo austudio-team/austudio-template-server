@@ -24,7 +24,7 @@ pub async fn static_files(state: web::Data<AppState>, req: HttpRequest) -> Resul
             "versions/{}/{}/{}/{}",
             v.major_version,
             v.minor_version,
-            v.major_version,
+            v.build_number,
             &path,
           );
           let path: PathBuf = path.parse().unwrap();

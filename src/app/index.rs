@@ -10,13 +10,14 @@ pub async fn index(state: web::Data<AppState>, req: HttpRequest) -> Result<impl 
   let db = state.db.clone();
   let cookie = req.cookie("version");;
   let target_version = parse_cookie_version(cookie, &db, state.last_version.lock().unwrap()).await;
+  println!("{:?}", target_version);
   match target_version {
     Some(v) => {
       let path = format!(
         "versions/{}/{}/{}/index.html",
         v.major_version,
         v.minor_version,
-        v.major_version,
+        v.build_number,
       );
       let path: PathBuf = path.parse().unwrap();
       match NamedFile::open(path) {
