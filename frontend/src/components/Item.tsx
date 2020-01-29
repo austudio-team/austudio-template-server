@@ -1,6 +1,23 @@
-import React from 'react';
+import React, {useCallback} from 'react';
 import { Icon, Popover } from 'antd';
 import styled from 'styled-components';
+import Day from 'dayjs';
+
+export interface Version {
+  id: string,
+  major_version: number,
+  minor_version: number,
+  build_number: number,
+  description: string,
+  branch_name: string,
+  create_time: string,
+}
+
+interface ItemProps {
+  version: Version,
+  active?: boolean,
+  onClick: (v: string) => void,
+}
 
 const Container = styled.div<{ active?: boolean }>`
   padding: 6px 16px;
@@ -39,22 +56,31 @@ const ItemPopover = styled.div`
   max-width: 200px;
 `;
 
-interface ItemProps {
-  active?: boolean;
-};
-
 const Item: React.FC<ItemProps> = props => {
+  const { version, onClick } = props;
+  const {
+    major_version,
+    minor_version,
+    build_number,
+    branch_name,
+    description,
+    create_time,
+  } = version;
+  const versionStr = `${major_version}.${minor_version}.${build_number}`;
+  const clickCallback = useCallback(() => {
+    onClick(versionStr);
+  }, []);
   return (
-    <Container active={props.active}>
-      <Version>v1.0.0</Version>
+    <Container onClick={clickCallback} active={props.active}>
+      <Version>v{versionStr}</Version>
       <div>
-        <Branch>feat-create-audio</Branch>
+        <Branch>{branch_name}</Branch>
         <Popover
           placement="bottom"
           content={(
             <ItemPopover>
-              <div>feat: add audio create entry</div>
-              <DateTime>2020/01/02 11:11:21</DateTime>
+              <div>{description}</div>
+              <DateTime>{Day(create_time).format('YYYY-MM-DD HH:mm:ss')}</DateTime>
             </ItemPopover>
           )}
         >
