@@ -3,11 +3,11 @@ use crate::utils::{
   last_version::get_last_version,
   extract_file::extract_file_and_inject,
 };
-use actix_multipart::Multipart;
+use actix_multipart::{Multipart, Field};
 use super::AppState;
 use actix_web::{Responder, web, HttpResponse, ResponseError};
 use crate::error::Error;
-use futures::StreamExt;
+use futures::{StreamExt, TryStreamExt};
 use serde_json;
 use actix_web::web::Bytes;
 use serde::Serialize;
@@ -70,14 +70,14 @@ pub async fn create(state: web::Data<AppState>, mut payload: Multipart) -> impl 
   let mut last_version = state.last_version.lock().unwrap();
   let last_version = get_last_version(&db, last_version, false).await;
   let mut create_info: Option<CreateVersionParams> = None;
-  let mut file_chunk: Option<Bytes> = None;
+  let mut file_chunk: Vec<u8> = vec![];
   while let Some(item) = payload.next().await {
     let mut field = item.unwrap();
     let content_disposition = field.content_disposition().unwrap();
     let field_name = content_disposition.get_name().unwrap_or_default();
-    let chunk = field.next().await.unwrap();
     match field_name {
       "info" => {
+        let chunk = field.next().await.unwrap();
         let data = chunk.unwrap().to_vec();
         let str = String::from_utf8(data).unwrap();
         let str = str.replace("\n", "\\n");
@@ -86,13 +86,15 @@ pub async fn create(state: web::Data<AppState>, mut payload: Multipart) -> impl 
         create_info = Some(res);
       },
       "file" => {
-        let data = chunk.unwrap();
-        file_chunk = Some(data);
+        while let Some(chunk) = field.next().await {
+          let data: &[u8] = &chunk.unwrap();
+          file_chunk = [file_chunk.as_slice(), data].concat();
+        }
       }
       _ => (),
     }
   }
-  if create_info.is_none() || file_chunk.is_none() {
+  if create_info.is_none() || file_chunk.len() == 0 {
     return Error::UnprocessableEntity(json!({ "error": "invalided request" })).error_response();
   }
   let mut major_version = last_version.as_ref().map_or(1, |v| v.major_version);
@@ -124,9 +126,9 @@ pub async fn create(state: web::Data<AppState>, mut payload: Multipart) -> impl 
   let description = create_info.description.unwrap_or(String::from("No description"));
   let branch_name = create_info.branch_name.unwrap_or(String::from("no-branch"));
   let extract_res = extract_file_and_inject(
-    file_chunk.unwrap(),
+    file_chunk.as_slice(),
     format!("versions/{}/{}/{}", major_version, minor_version, build_number).as_str()
-  );
+  ).await;
   if extract_res.is_err() {
     return Error::UnprocessableEntity(json!({ "error": "file can't extract" })).error_response();
   }

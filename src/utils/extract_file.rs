@@ -4,9 +4,11 @@ use actix_web::web::Bytes;
 use std::fs::{create_dir_all, File, remove_dir_all};
 use std::path::Path;
 use std::io::{Read, Write};
+use actix_multipart::Field;
+use futures::StreamExt;
 
-pub fn extract_file_and_inject(file: Bytes, path: &str) -> Result<(), ()> {
-  let res = extract_file_and_inject_inner(file, path);
+pub async fn extract_file_and_inject(file: &[u8], path: &str) -> Result<(), ()> {
+  let res = extract_file_and_inject_inner(file, path).await;
   match res {
     Err(e) => {
       let path = Path::new(path);
@@ -21,12 +23,12 @@ pub fn extract_file_and_inject(file: Bytes, path: &str) -> Result<(), ()> {
   }
 }
 
-fn extract_file_and_inject_inner(file: Bytes, path: &str) -> Result<(), ()> {
-  let data: &[u8] = &file;
-  let tar = GzDecoder::new(data);
+async fn extract_file_and_inject_inner(file: &[u8], path: &str) -> Result<(), ()> {
+  let tar = GzDecoder::new(file);
   let mut archive = Archive::new(tar);
   create_dir_all(path);
-  archive.unpack(path).map_err(|_| ())?;
+  archive.unpack(path).unwrap();
+//  archive.unpack(path).map_err(|_| ())?;
   let index_file_path = format!("{}/index.html", path);
   let mut src = File::open(&index_file_path).map_err(|_| ())?;
   let mut data = String::new();
