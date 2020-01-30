@@ -53,7 +53,12 @@ const DateTime = styled.div`
 const ItemPopover = styled.div`
   user-select: none;
   cursor: default;
-  max-width: 200px;
+  max-width: 300px;
+`;
+
+const Description = styled.div`
+  white-space: pre-wrap;
+  word-break: break-all;
 `;
 
 const Item: React.FC<ItemProps> = props => {
@@ -79,7 +84,7 @@ const Item: React.FC<ItemProps> = props => {
           placement="bottom"
           content={(
             <ItemPopover>
-              <div>{description}</div>
+              <Description>{description}</Description>
               <DateTime>{Day(create_time).format('YYYY-MM-DD HH:mm:ss')}</DateTime>
             </ItemPopover>
           )}
