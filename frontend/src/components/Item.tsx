@@ -10,7 +10,7 @@ export interface Version {
   build_number: number,
   description: string,
   branch_name: string,
-  create_time: string,
+  created_time: string,
 }
 
 interface ItemProps {
@@ -69,7 +69,7 @@ const Item: React.FC<ItemProps> = props => {
     build_number,
     branch_name,
     description,
-    create_time,
+    created_time,
   } = version;
   const versionStr = `${major_version}.${minor_version}.${build_number}`;
   const clickCallback = useCallback(() => {
@@ -85,7 +85,7 @@ const Item: React.FC<ItemProps> = props => {
           content={(
             <ItemPopover>
               <Description>{description}</Description>
-              <DateTime>{Day(create_time).format('YYYY-MM-DD HH:mm:ss')}</DateTime>
+              <DateTime>{Day(created_time).format('YYYY-MM-DD HH:mm:ss')}</DateTime>
             </ItemPopover>
           )}
         >
