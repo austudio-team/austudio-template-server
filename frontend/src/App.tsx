@@ -10,7 +10,7 @@ const Button = styled.div`
   width: 8px;
   border-radius: 50%;
   position: fixed;
-  left: 8px;
+  right: 32px;
   top: 8px;
   background-color: lightblue;
   cursor: pointer;
@@ -31,9 +31,10 @@ const NoPaddingPopover = styled(WrappedPopover)`
 export default () => {
   return (
     <NoPaddingPopover
-      placement="topLeft"
+      placement="bottomRight"
       trigger="click"
       content={<List />}
+      arrowPointAtCenter
     >
       <Button />
     </NoPaddingPopover>

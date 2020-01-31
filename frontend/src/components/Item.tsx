@@ -81,7 +81,8 @@ const Item: React.FC<ItemProps> = props => {
       <div>
         <Branch>{branch_name}</Branch>
         <Popover
-          placement="bottom"
+          placement="bottomRight"
+          arrowPointAtCenter
           content={(
             <ItemPopover>
               <Description>{description}</Description>
